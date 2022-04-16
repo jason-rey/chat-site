@@ -36,9 +36,8 @@ class Server():
             except Exception as e:
                 addr = websocket.remote_address[0]
                 print(f"[DISCONNECTION] {addr} has disconnected")
-                print(f"[ACTIVE CONNECTIONS] {len(self.connections)}")
-
                 self.connections.pop(addr)
+                print(f"[ACTIVE CONNECTIONS] {len(self.connections)}")
                 break
 
 

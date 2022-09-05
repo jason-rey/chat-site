@@ -11,11 +11,10 @@ class Server():
         ip = socket.gethostbyname(socket.gethostname())
         port = 5050
         print(f"[STARTING] server has started")
+        print(f"[LISTENING] listening on port {port}")
 
         async with websockets.serve(self.handle_connection, ip, port):
             await asyncio.Future()
-        
-        print(f"[LISTENING] listening on port {port}")
 
     async def handle_connection(self, websocket):
         addr = websocket.remote_address[0]
@@ -27,16 +26,16 @@ class Server():
         await self.on_message_receive(websocket)
 
     async def on_message_receive(self, websocket):
+        authorAddr = websocket.remote_address[0]
         while True:
             try:
                 message = await websocket.recv()
                 for addr in self.connections:
                     ws = self.connections[addr]
-                    await ws.send(message)
+                    await ws.send(f"{authorAddr}: {message}")
             except Exception as e:
-                addr = websocket.remote_address[0]
-                print(f"[DISCONNECTION] {addr} has disconnected")
-                self.connections.pop(addr)
+                print(f"[DISCONNECTION] {authorAddr} has disconnected")
+                self.connections.pop(authorAddr)
                 print(f"[ACTIVE CONNECTIONS] {len(self.connections)}")
                 break
 

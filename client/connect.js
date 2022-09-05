@@ -1,4 +1,4 @@
-const socket = new WebSocket("ws://34.125.169.203:5050")
+const socket = new WebSocket("ws://26.146.230.220:5050")
 
 socket.addEventListener("message", function(event) {
     console.log(event.data)
@@ -15,6 +15,7 @@ let input = document.getElementById("msgInput");
 
 input.addEventListener("keydown", function(event) {
     if (event.key == "Enter") {
+        console.log("wh");
         send_message();
     }
 });

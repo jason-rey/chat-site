@@ -9,6 +9,7 @@ class Server():
 
     async def start(self):
         ip = socket.gethostbyname(socket.gethostname())
+        print(ip)
         port = 5050
         print(f"[STARTING] server has started")
         print(f"[LISTENING] listening on port {port}")

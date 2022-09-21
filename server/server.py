@@ -37,11 +37,7 @@ class Server():
             self.connections[addr] = {port: websocket}
         else:
             self.connections[addr][port] = websocket
-<<<<<<< HEAD
-
-=======
         
->>>>>>> 6638b9526e43ccee2415bb4c7a0b8d748aa1ac12
         print(f"[ACTIVE CONNECTIONS] {self.get_number_of_connections()}")
         await self.send_past_messages(websocket)
         await self.on_message_receive(websocket)

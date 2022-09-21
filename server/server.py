@@ -6,6 +6,7 @@ class Server():
     def __init__(self):
         self.server = None
         self.connections = {}
+        self.pastMessages = []
 
     async def start(self):
         ip = socket.gethostbyname(socket.gethostname())
@@ -22,6 +23,10 @@ class Server():
         for ip in self.connections:
             count += len(self.connections[ip])
         return count
+	
+    async def send_past_messages(self, target):
+        for message in self.pastMessages:
+            await target.send(message)
 
     async def handle_connection(self, websocket):
         addr = websocket.remote_address[0]
@@ -32,8 +37,9 @@ class Server():
             self.connections[addr] = {port: websocket}
         else:
             self.connections[addr][port] = websocket
-            
+        
         print(f"[ACTIVE CONNECTIONS] {self.get_number_of_connections()}")
+        await self.send_past_messages(websocket)
         await self.on_message_receive(websocket)
 
         
@@ -47,7 +53,9 @@ class Server():
                 for addr in self.connections:
                     for port in self.connections[addr]:
                         ws = self.connections[addr][port]
-                        await ws.send(f"{authorPort}: {message}")
+                        outMsg = f"{authorPort}: {message}"
+                        self.pastMessages.append(outMsg)
+                        await ws.send(outMsg)
             except Exception as e:
                 print(e)
                 print(f"[DISCONNECTION] {authorAddr}:{authorPort} has disconnected")

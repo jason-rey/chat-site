@@ -17,17 +17,26 @@ class Server():
         async with websockets.serve(self.handle_connection, ip, port):
             await asyncio.Future()
 
+    def get_number_of_connections(self):
+        count = 0
+        for ip in self.connections:
+            count += len(self.connections[ip])
+        return count
+
     async def handle_connection(self, websocket):
         addr = websocket.remote_address[0]
         port = websocket.remote_address[1]
         print(f"[CONNECTION] {addr}:{port} has connected")
 
-
         if addr not in self.connections:
             self.connections[addr] = {port: websocket}
         else:
             self.connections[addr][port] = websocket
+            
+        print(f"[ACTIVE CONNECTIONS] {self.get_number_of_connections()}")
         await self.on_message_receive(websocket)
+
+        
 
     async def on_message_receive(self, websocket):
         authorAddr = websocket.remote_address[0]
@@ -47,7 +56,7 @@ class Server():
                 if len(self.connections[authorAddr]) <= 0:
                     self.connections.pop(authorAddr)
                 
-                print(f"[ACTIVE CONNECTIONS] {len(self.connections)}")
+                print(f"[ACTIVE CONNECTIONS] {self.get_number_of_connections()}")
                 break
 
 

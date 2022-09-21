@@ -21,6 +21,7 @@ input.addEventListener("keydown", function(event) {
 });
 
 function send_message() {
-    let msg = document.getElementById("msgInput").value;
-    socket.send(msg);
+    let box = document.getElementById("msgInput")
+    socket.send(box.value);
+    box.value = "";
 }

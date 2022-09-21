@@ -1,4 +1,4 @@
-const socket = new WebSocket("ws://26.146.230.220:5050")
+const socket = new WebSocket("ws://34.125.85.254:5050")
 
 socket.addEventListener("message", function(event) {
     console.log(event.data)

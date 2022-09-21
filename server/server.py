@@ -32,7 +32,7 @@ class Server():
             self.connections[addr] = {port: websocket}
         else:
             self.connections[addr][port] = websocket
-            
+
         print(f"[ACTIVE CONNECTIONS] {self.get_number_of_connections()}")
         await self.on_message_receive(websocket)
 
@@ -47,7 +47,9 @@ class Server():
                 for addr in self.connections:
                     for port in self.connections[addr]:
                         ws = self.connections[addr][port]
-                        await ws.send(f"{authorPort}: {message}")
+                        outMsg = f"{authorPort}: {message}"
+                        self.pastMessages.append(outMsg)
+                        await ws.send(outMsg)
             except Exception as e:
                 print(e)
                 print(f"[DISCONNECTION] {authorAddr}:{authorPort} has disconnected")

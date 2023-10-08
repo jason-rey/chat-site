@@ -2,9 +2,17 @@ import asyncio
 import websockets
 from dotenv import load_dotenv
 import os
+import json
 
 from room import Room
 from user import User
+
+'''
+TODO
+    change response and command data to use json instead of what it is rn
+    change status codes to use normal http status codes
+    (do the same for the authentication server too)
+'''
 
 class Server():
     def __init__(self, _ip, _port):
@@ -55,15 +63,15 @@ class Server():
     async def main_loop(self, user: User):
         while True:
             try:
-                command = await user.socket.recv()
-                command = await self.parse_command(command)
+                message = await user.socket.recv()
+                command = json.loads(message)
                 result = await self.execute_command(command)
                 while result is None:
                     await asyncio.sleep(0.5)
 
                 action = command["method"]
                 print(f"{user.addr}: {action} : {str(result)}")
-                await user.socket.send(str(result))
+                await user.socket.send(json.dumps(result))
             except:
                 print(f"[DISCONNECTION] {user.name} ({user.addr}:{user.port}) has disconnected")
                 if user.name in self.usersInRooms:
@@ -75,18 +83,18 @@ class Server():
                 break
             
     
-    async def parse_command(self, command):
-        parsed = {
-            "method" : "",
-            "args": []
-        }
+    # async def parse_command(self, command):
+    #     parsed = {
+    #         "method" : "",
+    #         "args": []
+    #     }
 
-        delimiter = "|"
-        command = command.split(delimiter)
-        parsed["method"] = command[0]
-        parsed["args"] = command[1:]
+    #     delimiter = "|"
+    #     command = command.split(delimiter)
+    #     parsed["method"] = command[0]
+    #     parsed["args"] = command[1:]
 
-        return parsed
+    #     return json.loads(command)
 
     async def execute_command(self, command):
         # commands return a Response object that contain a status code and data
@@ -98,30 +106,71 @@ class Server():
 
         # should decrypt command argument here
 
-        method = self.commands[command["method"]]
-        return await method(*command["args"])
+        method = self.commands[command["action"]]
+        return await method(**command["args"])
     
-    async def get_rooms(self, *args):
-        response = "get_rooms"
+    async def get_rooms(self):
+        '''
+            command format:
+            {
+                "action": "get_rooms",
+            }
+
+            response format:
+            {
+                "statusCode": 200,
+                "type": "get_rooms",
+                "rooms": "roomName1,numberOfConnected|...|"
+            }
+        '''
+
+        response = {
+            "statusCode": 200,
+            "type": "get_rooms"
+        }
+
+        roomDataString = ""
         for roomName in self.rooms:
             room = self.rooms[roomName]
-            response += f"|{room.name},{room.numberOfConnections}"
-            
-        return f"1|{response}"
+            roomDataString += f"{room.name},{room.numberOfConnections}|"
 
-    async def connect_to_room(self, *args):
-        # connect_to_room|username|roomName|
-        # response: status_code|connect_to_room|connectedUser1|connectedUser2...
-        response = "connect_to_room"
-        user = self.usersNotInRooms.pop(args[0])
+        response["rooms"] = roomDataString
+        return response
+
+    async def connect_to_room(self, username=None, roomName=None):
+        '''
+            command format: 
+            {
+                "action": "connect_to_room",
+                "args": {
+                    "username": username,
+                    "roomName": roomName
+                }
+            }
+
+            response:
+            {
+                "statusCode": 200,
+                "type": "connect_to_room",
+                "connectedUsers: "user1|user2|user3|...|"
+            }
+        '''
+
+        user = self.usersNotInRooms.pop(username)
         self.usersInRooms[user.name] = user
-        targetRoom = args[1]
-        await self.rooms[targetRoom].connect_user(user)
+        await self.rooms[roomName].connect_user(user)
 
-        for username in self.rooms[targetRoom].getConnectedUsernames():
-            response += f"|{username}"
+        response = {
+            "statusCode": 200,
+            "type": "connect_to_room",
+        }
 
-        return f"1|{response}"
+        connectedUsersString=""
+        for username in self.rooms[roomName].getConnectedUsernames():
+            response += f"{username}|"
+
+        response["connectedUsers"] = connectedUsersString
+        return response
     
     async def disconnect_from_room(self, *args):
         pass

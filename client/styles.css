@@ -1,0 +1,38 @@
+#container {
+    margin: auto;
+    text-align: center;
+    
+}
+
+#textBox {
+    text-align: left;
+    margin: auto;
+    overflow: auto;
+
+    height: 250px;
+    width: 250px;
+}
+
+#msgInput {
+    margin-left: auto;
+    margin-right: 0;
+}
+
+.roomBox {
+    border: 1px;
+    border-style: solid;
+    width: 240px;
+    height: 25px;
+    margin-top: 5px;
+    vertical-align: middle;
+    transition: 0.25s;
+    
+}
+
+.roomBox:hover {
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+.roomBox:active {
+    background-color: rgba(0, 0, 0, 0.7);
+}

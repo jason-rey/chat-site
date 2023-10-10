@@ -1,27 +1,72 @@
-const socket = new WebSocket("ws://35.247.117.41:5473")
-let username = localStorage.getItem("username");
+const socket = new WebSocket("ws://34.145.26.131:5473")
+// let username = localStorage.getItem("username");
 // let sessionID = localStorage.getItem("sessionID");
+
+let username = "testUser";
 
 socket.onopen = () => socket.send(username);
 
 let currentRoom = "";
-sendMessage("get_rooms|");
 
-document.getElementById("createRoom").addEventListener("click", function(event){
-    socket.send("get_rooms|");
+const msg = {
+    "action": "get_rooms",
+    "args": {}
+};
+sendMessage(JSON.stringify(msg));
+
+document.getElementById("createRoom").addEventListener("click", async function(event) {
+    let roomName = document.getElementById("roomNameBox").value;
+    let createRoomCommand = {
+        "action": "create_room",
+        "args": {
+            "roomName": roomName,
+            "username": username
+        }
+    };
+    await sendMessage(JSON.stringify(createRoomCommand));
+
+    document.getElementById("textBox").innerHTML = "";
+    let connectCommand = {
+        "action": "connect_to_room",
+        "args": {
+            "username": username,
+            "roomName": roomName
+        }
+    };
+    currentRoom = roomName;
+    await sendMessage(JSON.stringify(connectCommand));
+});
+
+document.getElementById("disconnectButton").addEventListener("click", async function(event) {
+    let dcMsg = {
+        "action": "disconnect_from_room",
+        "args": {
+            "roomName": currentRoom,
+            "username": username
+        }
+    };
+    await sendMessage(JSON.stringify(dcMsg));
+
+    event.target.style.display = "none";
+    document.getElementById("roomControls").style = "";
+
+    await sendMessage(JSON.stringify(msg));
 });
 
 let responseActions = {
-    "get_rooms" : updateRooms,
+    "get_rooms" : get_rooms,
     "connect_to_room" : connect_to_room,
     "receive_message" : receive_message
 };
 
 socket.addEventListener("message", function(event) {
-    let responseInfo = event.data.split("|");
-    let method = responseActions[responseInfo[1]];
-    method(responseInfo.slice(2));
+    let responseInfo = JSON.parse(event.data);
+    console.log(responseInfo);
 
+    if (responseInfo.type != "") {
+        let method = responseActions[responseInfo.type];
+        method(responseInfo.data);
+    }
 });
 
 function waitForConnection(socket) {
@@ -55,13 +100,15 @@ async function sendMessage(message) {
     }
 }
 
-function updateRooms(roomInfo) {
+function get_rooms(roomInfo) {
+    let roomData = roomInfo.rooms.split("|");
     let rooms = {};
-    for (let i = 0; i < roomInfo.length; i++) {
-        let data = roomInfo[i].split(",");
-        let rName = data[0];
-        let rCapacity = data[1];
-        rooms[rName] = rCapacity;
+    for (let i = 0; i < roomData.length; i++) {
+        let currRoomData = roomData[i].split(",");
+        let roomName = currRoomData[0];
+        let connectedCount = currRoomData[1];
+
+        rooms[roomName] = connectedCount;
     }
 
     let box = document.getElementById("textBox");
@@ -77,9 +124,16 @@ function updateRooms(roomInfo) {
         `
 
         roomDiv.addEventListener("click", async function(event) {
-            console.log(`clicked ${event.target.id}`);
             document.getElementById("textBox").innerHTML = "";
-            await sendMessage(`connect_to_room|${username}|${event.target.id}`);
+            command = {
+                "action": "connect_to_room",
+                "args": {
+                    "username": username,
+                    "roomName": roomDiv.id
+                }
+            };
+
+            await sendMessage(JSON.stringify(command));
             currentRoom = event.target.id;
         });
 
@@ -87,16 +141,15 @@ function updateRooms(roomInfo) {
     }
 }
 
-function connect_to_room(connectedUsers) {
+async function connect_to_room(connectedUsers) {
     // document.getElementById("textBox").innerHTML = "";
     document.getElementById("roomControls").style.display = "none";
-    console.log(connectedUsers);
+    document.getElementById("disconnectButton").style = "";
 }
 
 async function receive_message(messageData) {
-    console.log(messageData)
         // await waitForConnection();
-    document.getElementById("textBox").innerText += `${messageData[0]}: ${messageData[1]}\n`
+    document.getElementById("textBox").innerText += `${messageData.author}: ${messageData.message}\n`;
         // document.getElementById("textBox").innerHTML += `${messageData[0]}: ${messageData[1]}\n`
 
 }
@@ -109,9 +162,18 @@ input.addEventListener("keydown", function(event) {
     }
 });
 
-function sendChatMessage() {
-    let box = document.getElementById("msgInput")
-    socket.send(`send_message|${currentRoom}|${username}|${box.value}`);
+async function sendChatMessage() {
+    let box = document.getElementById("msgInput");
+
+    messageCommand = {
+        "action": "send_message",
+        "args": {
+            "roomName": currentRoom,
+            "author": username,
+            "message": box.value
+        }
+    };
+    await sendMessage(JSON.stringify(messageCommand));
     box.value = "";
 }
 

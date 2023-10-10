@@ -1,8 +1,10 @@
 import random
 import asyncio
+import websockets
 
 from message import Message
 from user import User
+from response import Response
 
 class Room():
     def __init__(self, roomName):
@@ -25,21 +27,28 @@ class Room():
 
         return out
 
+    async def send_message(self, target: User, message: Message):
+        msgData = {
+            "author": message.author,
+            "message": message.contents
+        }
+        
+        outMsg = Response("200", "receive_message", msgData)
+        await target.socket.send(outMsg.to_json())
+        
     async def connect_user(self, user: User):
         self.connectedUsers[user.name] = user
-
+        
         for message in self.messages:
-            outMsg = f"1|receive_message|{message.author}|{message.contents}"
-            await user.socket.send(outMsg)
+            await self.send_message(user, message)
 
     async def disconnect_user(self, user: User):
         self.connectedUsers.pop(user.name)
 
     async def send_message_to_connected_users(self, author, message):
+        messageObj = Message(author, message)
         for username in self.connectedUsers:
-            user = self.connectedUsers[username]
-            outMsg = f"1|receive_message|{author}|{message}"
-            await user.socket.send(outMsg)
-
-        self.messages.append(Message(author, message))
+            targetUser = self.connectedUsers[username]
+            await self.send_message(targetUser, messageObj)
+        self.messages.append(messageObj)
     

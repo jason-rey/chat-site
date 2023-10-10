@@ -1,4 +1,4 @@
-const socket = new WebSocket("ws://35.247.117.41:5050")
+const socket = new WebSocket("ws://34.145.26.131:5050")
 
 // const KEY = "2197c9893de94f5fa2bc4373e7eb6886"
 // socket.onopen = () => socket.send(KEY)

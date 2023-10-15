@@ -1,10 +1,14 @@
 const socket = new WebSocket("ws://34.145.26.131:5473")
-// let username = localStorage.getItem("username");
-// let sessionID = localStorage.getItem("sessionID");
+let username = localStorage.getItem("username");
+let sessionID = localStorage.getItem("sessionID");
 
-let username = "testUser";
+// let username = "testUser";
+let connectionInfo = {
+    "username": username,
+    "sessionID": sessionID
+};
 
-socket.onopen = () => socket.send(username);
+socket.onopen = () => socket.send(JSON.stringify(connectionInfo));
 
 let currentRoom = "";
 

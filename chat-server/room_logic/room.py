@@ -4,7 +4,8 @@ import websockets
 
 from message import Message
 from user import User
-from response import Response
+
+import utils
 
 class Room():
     def __init__(self, roomName):
@@ -33,7 +34,7 @@ class Room():
             "message": message.contents
         }
         
-        outMsg = Response("200", "receive_message", msgData)
+        outMsg = utils.Response("200", "receive_message", msgData)
         await target.socket.send(outMsg.to_json())
         
     async def connect_user(self, user: User):

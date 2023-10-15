@@ -6,13 +6,11 @@ from dotenv import load_dotenv
 import os
 import json
 
-from room import Room
-from user import User
-from response import Response
+import utils
+import room_logic
 
 '''
 TODO
-    change response and command data to use json instead of what it is rn
     change status codes to use normal http status codes
     (do the same for the authentication server too)
 '''
@@ -21,13 +19,13 @@ class Server():
     def __init__(self, _ip, _port):
         self.ip = _ip
         self.port = _port
-        self.authServerSocket = None
+        self.authenticator = utils.Authenticator("34.168.167.27", "5050")
 
         # {username : User()}
-        self.usersNotInRooms = {}
+        self.usersNotInRooms = dict[str, room_logic.User]
 
         # {username : Room()}
-        self.usersInRooms = {}
+        self.usersInRooms = dict[str, room_logic.Room]
 
         self.rooms = {}
 
@@ -42,23 +40,30 @@ class Server():
     async def start(self):
         print(f"[STARTING] server has started")
         print(f"[LISTENING] listening on address {self.ip}:{self.port}")
-        
+
         async with websockets.serve(self.handle_connection, self.ip, self.port):
             await asyncio.Future()
 
     async def handle_connection(self, websocket):
         addr = websocket.remote_address[0]
         port = websocket.remote_address[1]
-        username = await websocket.recv()
+        data = await websocket.recv()
+        connectionInfo = json.loads(data)
+        username = connectionInfo["username"]
+        sessionID = connectionInfo["sessionID"]
 
         print(f"[CONNECTION] {username} ({addr}:{port}) has connected")
-        newUser = User(username, addr, port, websocket)
+        newUser = room_logic.User(username, addr, port, sessionID, websocket)
         self.usersNotInRooms[username] = newUser
         await self.main_loop(newUser)
     
-    async def main_loop(self, user: User):
+    async def main_loop(self, user: room_logic.User):
         while True:
             try:
+                isValid = await self.authenticator.check(user.sessionID)
+                if isValid[0] != "1":
+                    raise Exception("session ID not valid")
+                
                 message = await user.socket.recv()
                 print(f"command: {message}")
                 command = json.loads(message)
@@ -80,10 +85,6 @@ class Server():
                     
                 break
                 
-    async def send_past_messages(self, target):
-        for message in self.pastMessages:
-            await target.send(message)
-
     async def execute_command(self, command):
         """"
             command format:
@@ -121,7 +122,7 @@ class Server():
             room = self.rooms[roomName]
             roomDataString += f"|{room.name},{room.numberOfConnections}"
 
-        return Response("200", "get_rooms", {"rooms": roomDataString[1:]})
+        return utils.Response("200", "get_rooms", {"rooms": roomDataString[1:]})
 
     async def connect_to_room(self, username=None, roomName=None):
         '''
@@ -155,7 +156,7 @@ class Server():
         if connectedUsersString != "":
             connectedUsersString = connectedUsersString[1:]
 
-        return Response("200", "connect_to_room", {"connectedUsers": connectedUsersString})
+        return utils.Response("200", "connect_to_room", {"connectedUsers": connectedUsersString})
     
     async def disconnect_from_room(self, roomName=None, username=None):
         room = self.rooms[roomName]
@@ -163,19 +164,19 @@ class Server():
         await room.disconnect_user(userObj)
         self.usersNotInRooms[username] = userObj
         
-        return Response("200")
+        return utils.Response("200")
 
     async def create_room(self, roomName=None, username=None):
-        newRoom = Room(roomName)
+        newRoom = room_logic.Room(roomName)
         self.rooms[roomName] = newRoom
 
-        return Response("200")
+        return utils.Response("200")
     
     async def send_message(self, roomName=None, author=None, message=None):
         targetRoom = self.rooms[roomName]
         await targetRoom.send_message_to_connected_users(author, message)
         
-        return Response("200")
+        return utils.Response("200")
 
 def configure():
     load_dotenv()

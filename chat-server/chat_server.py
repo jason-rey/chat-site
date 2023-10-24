@@ -3,19 +3,18 @@
 import asyncio
 import websockets
 from websockets.server import WebSocketServerProtocol
-from dotenv import load_dotenv
-import os
 import json
 
 import utils
 import room_logic
 import server_commands
+from config import Config
 
 class Server():
     def __init__(self, _ip, _port):
         self.ip = _ip
         self.port = _port
-        self.authenticator = utils.Authenticator("127.0.0.1", "5000")
+        self.authenticator = utils.Authenticator(Config.AUTH_SERVER_IP, Config.AUTH_SERVER_PORT)
 
         # {username : User()}
         self.users: dict[str, room_logic.User] = {}
@@ -88,10 +87,7 @@ class Server():
         CommandObj = self.commands[commandMessage["action"]]
         return await CommandObj.execute(**commandMessage["args"])
     
-def configure():
-    load_dotenv()
 
 if __name__ == "__main__":
-    configure()
-    server = Server(os.getenv("chat_server_local_ip"), os.getenv("chat_server_port"))
+    server = Server(Config.HOST_IP, Config.HOST_PORT)
     asyncio.run(server.start())

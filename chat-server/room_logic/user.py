@@ -1,25 +1,25 @@
+from websockets.server import WebSocketServerProtocol
+
 class User():
-    def __init__(self, username, addr, port, socket):
+    def __init__(self, username:str="", addr:str="", port:str="", socket:WebSocketServerProtocol=None):
         self._name = username
         self._addr = addr
         self._port = port
         self._socket = socket
+        self.currentRoom = None
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @property
-    def addr(self):
+    def addr(self) -> str:
         return self._addr
 
     @property
-    def port(self):
+    def port(self) -> str:
         return self._port
 
     @property
-    def socket(self):
+    def socket(self) -> WebSocketServerProtocol:
         return self._socket
-    
-    def send(self, message):
-        pass

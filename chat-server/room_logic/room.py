@@ -1,27 +1,23 @@
-import random
-import asyncio
-import websockets
-
-from message import Message
-from user import User
+from room_logic.message import Message
+from room_logic.user import User
 
 import utils
 
 class Room():
-    def __init__(self, roomName):
+    def __init__(self, roomName:str):
         self._name = roomName
-        self.connectedUsers = {}
-        self.messages = []
+        self.connectedUsers: dict[str, User] = {}
+        self.messages: list[Message] = []
 
     @property
-    def name(self):
+    def name(self) ->str:
         return self._name
     
     @property
-    def numberOfConnections(self):
+    def numberOfConnections(self) -> int:
         return len(self.connectedUsers)
     
-    def getConnectedUsernames(self):
+    def getConnectedUsernames(self) -> list[str]:
         out = []
         for user in self.connectedUsers:
             out.append(user)
@@ -39,14 +35,16 @@ class Room():
         
     async def connect_user(self, user: User):
         self.connectedUsers[user.name] = user
-        
         for message in self.messages:
             await self.send_message(user, message)
 
+        await self.send_message_to_connected_users("[Room]", f"{user.name} has connected.")
+
     async def disconnect_user(self, user: User):
         self.connectedUsers.pop(user.name)
+        await self.send_message_to_connected_users("[Room]", f"{user.name} has disconnected.")
 
-    async def send_message_to_connected_users(self, author, message):
+    async def send_message_to_connected_users(self, author:str , message: str):
         messageObj = Message(author, message)
         for username in self.connectedUsers:
             targetUser = self.connectedUsers[username]

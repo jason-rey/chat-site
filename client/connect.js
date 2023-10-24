@@ -1,11 +1,11 @@
-const socket = new WebSocket("ws://34.145.26.131:5473")
+const socket = new WebSocket("ws://127.0.0.1:5050")
 let username = localStorage.getItem("username");
-let sessionID = localStorage.getItem("sessionID");
+let token = localStorage.getItem("token");
 
 // let username = "testUser";
 let connectionInfo = {
     "username": username,
-    "sessionID": sessionID
+    "token": token
 };
 
 socket.onopen = () => socket.send(JSON.stringify(connectionInfo));
@@ -13,6 +13,7 @@ socket.onopen = () => socket.send(JSON.stringify(connectionInfo));
 let currentRoom = "";
 
 const msg = {
+    "token": token,
     "action": "get_rooms",
     "args": {}
 };
@@ -21,6 +22,7 @@ sendMessage(JSON.stringify(msg));
 document.getElementById("createRoom").addEventListener("click", async function(event) {
     let roomName = document.getElementById("roomNameBox").value;
     let createRoomCommand = {
+        "token": token,
         "action": "create_room",
         "args": {
             "roomName": roomName,
@@ -31,6 +33,7 @@ document.getElementById("createRoom").addEventListener("click", async function(e
 
     document.getElementById("textBox").innerHTML = "";
     let connectCommand = {
+        "token": token,
         "action": "connect_to_room",
         "args": {
             "username": username,
@@ -41,8 +44,18 @@ document.getElementById("createRoom").addEventListener("click", async function(e
     await sendMessage(JSON.stringify(connectCommand));
 });
 
+document.getElementById("refreshRooms").addEventListener("click", async function(event) {
+    let command = {
+        "token": token,
+        "action": "get_rooms",
+        "args": {}
+    };
+    await sendMessage(JSON.stringify(command));
+});
+
 document.getElementById("disconnectButton").addEventListener("click", async function(event) {
     let dcMsg = {
+        "token": token,
         "action": "disconnect_from_room",
         "args": {
             "roomName": currentRoom,
@@ -105,20 +118,15 @@ async function sendMessage(message) {
 }
 
 function get_rooms(roomInfo) {
-    let roomData = roomInfo.rooms.split("|");
-    let rooms = {};
-    for (let i = 0; i < roomData.length; i++) {
-        let currRoomData = roomData[i].split(",");
-        let roomName = currRoomData[0];
-        let connectedCount = currRoomData[1];
-
-        rooms[roomName] = connectedCount;
+    if (roomInfo.rooms === "") {
+        return;
     }
 
+    console.log(roomInfo);
     let box = document.getElementById("textBox");
     box.innerHTML = "";
-    for (var name in rooms) {
-        let capacity = rooms[name]
+    for (var name in roomInfo.rooms) {
+        let capacity = roomInfo.rooms[name].connectedCount;
         let roomDiv = document.createElement("div");
         roomDiv.id = name;
         roomDiv.className = "roomBox"
@@ -130,6 +138,7 @@ function get_rooms(roomInfo) {
         roomDiv.addEventListener("click", async function(event) {
             document.getElementById("textBox").innerHTML = "";
             command = {
+                "token": token,
                 "action": "connect_to_room",
                 "args": {
                     "username": username,
@@ -170,6 +179,7 @@ async function sendChatMessage() {
     let box = document.getElementById("msgInput");
 
     messageCommand = {
+        "token": token,
         "action": "send_message",
         "args": {
             "roomName": currentRoom,
@@ -180,21 +190,3 @@ async function sendChatMessage() {
     await sendMessage(JSON.stringify(messageCommand));
     box.value = "";
 }
-
-function parse_reply() {
-
-}
-
-function execute_message(serverMsg) {
-
-}
-
-// document.getElementById("createRoom").addEventListener("click", function(event) {
-//     let newBox = `
-//         <div class="roomBox">
-//             <div style="float:left; margin-left:5px;">Room</div>
-//             <div style="float:right; margin-right:5px;">5</dov>
-//         </div>
-//     `;
-//     document.getElementById("textBox").innerHTML += newBox;
-// });

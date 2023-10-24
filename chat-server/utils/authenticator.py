@@ -1,18 +1,31 @@
-from websockets.sync.client import connect
-from response import Response
+import requests
+
+from utils.response import Response
+from room_logic import User
 
 class Authenticator():
-    def __init__(self, _ip, _port):
+    def __init__(self, _ip: str, _port: str):
         self.ip = _ip
         self.port = _port
-        self.encryptionKey = ""
 
-    async def check(self, sessionID):
-        out = False
-        with connect(f"ws://{self.ip}:{self.port}") as websocket:
-            websocket.send(f"check|{sessionID}")
-            result = await websocket.recv()
-            if result == "1":
-                out = True
+    async def check(self, user: User, givenToken: str) -> bool:
+        headers = {
+            "username": user.name,
+        }
 
-        return out
+        body = {
+            "token": givenToken
+        }
+
+        url = f"http://{self.ip}:{self.port}/authenticate-token"
+        response = requests.post(
+            url=url,
+            headers=headers,
+            json=body
+        )
+
+        if response.status_code != 200:
+            print(response.json())
+            return False
+        
+        return True

@@ -1,54 +1,57 @@
-const socket = new WebSocket("ws://34.145.26.131:5050")
+const URL = "http://127.0.0.1:5000/"
 
-// const KEY = "2197c9893de94f5fa2bc4373e7eb6886"
-// socket.onopen = () => socket.send(KEY)
-
-let nameBox = document.getElementById("usernameInput");
-let passwordBox = document.getElementById("passwordInput");
-let outputText = document.getElementById("outputText");
-let displayLoginOutput = true;
-
-socket.addEventListener("message", function(event) {
-    let response = event.data.split("|");
-    let statusCode = response[0];
-    console.log(statusCode);
-    let data = response[1];
-
-    if (displayLoginOutput) {
-        if (statusCode == 1) {
-            outputText.innerHTML = "login successful";
-            localStorage.setItem("username", nameBox.value);
-            localStorage.setItem("sessionID", data);
-
-            window.location.href = "chat_page.html";
-            socket.close();
-        } else if (statusCode == 0) {
-            outputText.innerHTML = "incorrect username / password";
+document.getElementById("registerBtn").addEventListener("click", async () => {
+    const username = document.getElementById("usernameInput").value;
+    const password = document.getElementById("passwordInput").value;
+    let endpoint = URL + "register-user";
+    let response = await fetch(
+        endpoint, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                "username": username,
+                "password": password
+            })
         }
-    } else {
-        if (statusCode == 1) {
-            outputText.innerHTML = "registration successful";
-        } else if (statusCode == 0) {
-            outputText.innerHTML = "username taken";
-        }
-    }
-});
-
-document.getElementById("registerBtn").addEventListener("click", function(event) {
-    let username = nameBox.value;
-    let password = passwordBox.value;
-    if (username == "" || password == "") {
-        outputText.innerHTML = "username / password cannot be blank";
-    } else {
-        socket.send(`reg|${username}|${password}`);
-        displayLoginOutput = false;
-    }
-})
-
-document.getElementById("loginBtn").addEventListener("click", function(event) {
-    let username = nameBox.value;
-    let password = passwordBox.value;
+    );
     
-    socket.send(`auth|${username}|${password}`);
-    displayLoginOutput = true;
+    const outputBox = document.getElementById("outputText");
+    let responseData = await response.json();
+    if (response.status == 201) {
+        outputBox.innerText = "Account creation successful";
+    } else {
+        outputBox.innerText = "Username exists, please use another";
+    }    
 });
+
+document.getElementById("loginBtn").addEventListener("click", async () => {
+    const username = document.getElementById("usernameInput").value;
+    const password = document.getElementById("passwordInput").value;
+    let endpoint = URL + "login-user";
+    let response = await fetch(
+        endpoint, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                "username": username,
+                "password": password
+            })
+        }
+    );
+
+    const outputBox = document.getElementById("outputText");
+    let responseData = await response.json();
+    if (response.status == 200) {
+        outputBox.innerText = "Login successful";
+        localStorage.setItem("username", username);
+        localStorage.setItem("token", responseData["token"]);
+        window.location.href = "chat_page.html";
+    } else {
+        outputBox.innerText = "Incorrect username and/or password";
+    }    
+});
+

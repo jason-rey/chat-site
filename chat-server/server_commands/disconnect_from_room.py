@@ -9,21 +9,31 @@ class DisconnectFromRoom(CommandInterface):
     
     async def execute(self, roomName:str="", username:str=""):
         if roomName == "" or username == "":
-            raise Exception("invalid arguments")
+            return await self.create_response(
+                self.responseStatusEnum.ERROR,
+                type="input_error",
+                data={"message": "invalid arguments for DisconnectFromRoom"}
+            )
         
         if roomName not in self.rooms or username not in self.users:
-            raise Exception("room or username does not exist")
+            return await self.create_response(
+                self.responseStatusEnum.ERROR,
+                type="input_error",
+                data={"message": "give room or username does not exist"}
+            )
         
         roomObj = self.rooms[roomName]
         userObj = self.users[username]
 
         if username not in roomObj.connectedUsers:
-            print("not in room")
-            return
+            return await self.create_response(
+                self.responseStatusEnum.ERROR,
+                type="input_error",
+                data={"message": "user not connected to room"}
+            )
 
         await roomObj.disconnect_user(userObj)
         userObj.currentRoom = None
 
-        Response = await self.create_response(status="200")
-        return Response
+        return await self.create_response(self.responseStatusEnum.OK)
 

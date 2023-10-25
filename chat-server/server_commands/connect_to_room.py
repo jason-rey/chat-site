@@ -3,7 +3,8 @@ from room_logic import User
 from room_logic import Room
 
 class ConnectToRoom(CommandInterface):
-    def __init__(self, users:dict[str, User]={}, rooms:dict[str, Room]={}):
+    def __init__(self, actionName:str="", users:dict[str, User]={}, rooms:dict[str, Room]={}):
+        super().__init__(actionName=actionName)
         self.users = users
         self.rooms = rooms
     
@@ -23,20 +24,31 @@ class ConnectToRoom(CommandInterface):
                 "statusCode": "200",
                 "type": "connect_to_room",
                 "data": {
-                    "connectedUsers: "user1|user2|user3|...|"
+                    "connectedUsers: "["user1", "user2", ...]"
                 }
             }
         '''
         if username == "" or roomName == "":
-            raise Exception("invalid arguments to ConnectToRoom")
+            return await self.create_response(
+                self.responseStatusEnum.ERROR, 
+                type="input_error", 
+                data={"message": "invalid arguments to ConnectToRoom"}
+            )
         
         if roomName not in self.rooms:
-            print(f"{roomName} doesn't exist")
-            return
+            return await self.create_response(
+                self.responseStatusEnum.ERROR,
+                type="input_error",
+                data={"message": f"{roomName} does not exist"}
+            )
         
         targetRoom = self.rooms[roomName]
         await targetRoom.connect_user(self.users[username])
         self.users[username].currentRoom = targetRoom
-
-        Response = await self.create_response(status="200", type="connect_to_room")
-        return Response
+        connectedUsernames = await targetRoom.getConnectedUsernames()
+        
+        return await self.create_response(
+            self.responseStatusEnum.OK, 
+            type=self.actionName,
+            data={"usernames": connectedUsernames}
+        )

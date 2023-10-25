@@ -7,9 +7,12 @@ class CreateRoom(CommandInterface):
 
     async def execute(self, roomName:str="", username:str=""):
         if roomName == "" or username == "":
-            raise Exception("invalid arguments to CreateRoom")
+            return await self.create_response(
+                status=self.responseStatusEnum.ERROR,
+                type="input_error",
+                data={"message": "invalid arguments to CreateRoom"}
+            )
         
         self.rooms[roomName] = Room(roomName)
 
-        Response = await self.create_response(status="200")
-        return Response
+        return await self.create_response(status=self.responseStatusEnum.OK)

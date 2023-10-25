@@ -17,7 +17,7 @@ class Room():
     def numberOfConnections(self) -> int:
         return len(self.connectedUsers)
     
-    def getConnectedUsernames(self) -> list[str]:
+    async def getConnectedUsernames(self) -> list[str]:
         out = []
         for user in self.connectedUsers:
             out.append(user)
@@ -30,7 +30,7 @@ class Room():
             "message": message.contents
         }
         
-        outMsg = utils.Response("200", "receive_message", msgData)
+        outMsg = utils.Response(utils.Response.StatusType.OK, "receive_message", msgData)
         await target.socket.send(outMsg.to_json())
         
     async def connect_user(self, user: User):

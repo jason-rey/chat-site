@@ -21,7 +21,8 @@ class GetRooms(CommandInterface):
             }
         }
     '''
-    def __init__(self, rooms:dict[str, Room]={}):
+    def __init__(self, actionName="", rooms:dict[str, Room]={}):
+        self.actionName = actionName
         self.rooms = rooms
 
     async def execute(self):
@@ -32,5 +33,8 @@ class GetRooms(CommandInterface):
                 "connectedCount": currRoom.numberOfConnections
             } 
 
-        Response = await self.create_response(status="200", type="get_rooms", data={"rooms": roomDataDict})
-        return Response
+        return await self.create_response(
+            self.responseStatusEnum.OK,
+            type=self.actionName,
+            data={"rooms": roomDataDict}
+        )

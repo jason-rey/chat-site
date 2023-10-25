@@ -9,5 +9,4 @@ class SendMessage(CommandInterface):
         targetRoom = self.rooms[roomName]
         await targetRoom.send_message_to_connected_users(author, message)
 
-        Response = await self.create_response("200")
-        return Response
+        return await self.create_response(self.responseStatusEnum.OK)

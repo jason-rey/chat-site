@@ -7,7 +7,7 @@ import json
 
 import utils
 import room_logic
-import server_commands
+from server_commands import *
 from config import Config
 
 class Server():
@@ -21,13 +21,14 @@ class Server():
 
         # {roomName : Room()}
         self.rooms: dict[str, room_logic.Room] = {}
-
-        self.commands: dict[str, server_commands.CommandInterface] = {
-            "get_rooms": server_commands.GetRooms(rooms=self.rooms),
-            "connect_to_room": server_commands.ConnectToRoom(users=self.users, rooms=self.rooms),
-            "disconnect_from_room": server_commands.DisconnectFromRoom(users=self.users, rooms=self.rooms),
-            "create_room": server_commands.CreateRoom(rooms=self.rooms),
-            "send_message": server_commands.SendMessage(rooms=self.rooms)
+        
+        # commands are found in the /server_commands directory
+        self.commands: dict[str, CommandInterface] = {
+            "get_rooms": GetRooms(actionName="get_rooms", rooms=self.rooms),
+            "connect_to_room": ConnectToRoom(actionName="connect_to_room", users=self.users, rooms=self.rooms),
+            "disconnect_from_room": DisconnectFromRoom(users=self.users, rooms=self.rooms),
+            "create_room": CreateRoom(rooms=self.rooms),
+            "send_message": SendMessage(rooms=self.rooms)
         }
 
     async def start(self):
@@ -65,9 +66,13 @@ class Server():
                 if not isValid:
                     raise Exception("token is invalid")
 
-                result = await self.execute_command(command)
+                result = await self.execute_command(command)    
+                print(result.to_json())
                 await user.socket.send(result.to_json())
+                if result.status == utils.Response.StatusType.ERROR:
+                    raise Exception(f"{result.type}")
             except Exception as e:
+                print(e)
                 print(f"[DISCONNECTION] {user.name} ({user.addr}:{user.port}) has disconnected")
                 self.users.pop(user.name)
                 if user.currentRoom != None:

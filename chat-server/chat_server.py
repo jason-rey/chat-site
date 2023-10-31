@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 import asyncio
 import websockets
 from websockets.server import WebSocketServerProtocol
@@ -14,7 +12,10 @@ class Server():
     def __init__(self, _ip, _port):
         self.ip = _ip
         self.port = _port
+
         self.authenticator = utils.Authenticator(Config.AUTH_SERVER_IP, Config.AUTH_SERVER_PORT)
+        if not issubclass(type(self.authenticator), utils.AuthenticatorInterface):
+            raise Exception("Authenticator does not implement expected interface")
 
         # {username : User()}
         self.users: dict[str, room_logic.User] = {}
@@ -34,7 +35,6 @@ class Server():
     async def start(self):
         print(f"[STARTING] server has started")
         print(f"[LISTENING] listening on address {self.ip}:{self.port}")
-
         async with websockets.serve(self.handle_connection, self.ip, self.port):
             await asyncio.Future()
 
@@ -91,7 +91,6 @@ class Server():
 
         CommandObj = self.commands[commandMessage["action"]]
         return await CommandObj.execute(**commandMessage["args"])
-    
 
 if __name__ == "__main__":
     server = Server(Config.HOST_IP, Config.HOST_PORT)

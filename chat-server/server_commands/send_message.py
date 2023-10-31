@@ -1,4 +1,4 @@
-from server_commands import CommandInterface
+from .command_interface import CommandInterface
 from room_logic import Room
 
 class SendMessage(CommandInterface):

@@ -1,4 +1,4 @@
-from server_commands import CommandInterface
+from .command_interface import CommandInterface
 from room_logic import User
 from room_logic import Room
 
@@ -34,6 +34,9 @@ class DisconnectFromRoom(CommandInterface):
 
         await roomObj.disconnect_user(userObj)
         userObj.currentRoom = None
+        
+        if roomObj.numberOfConnections <= 0:
+            self.rooms.pop(roomName)
 
         return await self.create_response(self.responseStatusEnum.OK)
 

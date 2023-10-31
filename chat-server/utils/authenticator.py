@@ -1,9 +1,9 @@
 import requests
 
-from utils.response import Response
+from .authenticator_interface import AuthenticatorInterface
 from room_logic import User
 
-class Authenticator():
+class Authenticator(AuthenticatorInterface):
     def __init__(self, _ip: str, _port: str):
         self.ip = _ip
         self.port = _port

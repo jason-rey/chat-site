@@ -16,7 +16,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
             })
         }
     );
-    
+
     const outputBox = document.getElementById("outputText");
     let responseData = await response.json();
     if (response.status == 201) {
@@ -24,6 +24,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     } else {
         outputBox.innerText = "Username exists, please use another";
     }    
+    outputBox.style.visibility = "visible";
 });
 
 document.getElementById("loginBtn").addEventListener("click", async () => {
@@ -53,5 +54,6 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     } else {
         outputBox.innerText = "Incorrect username and/or password";
     }    
+    outputBox.style.visibility = "visible";
 });
 

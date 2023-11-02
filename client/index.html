@@ -8,9 +8,64 @@
     <title>Login</title>
 
     <style>
+        body {
+            background-color: #2f4f4f;
+        }
+
         #container {
             margin-top: 30vh;
             text-align: center;
+        }
+
+        input {
+            font-size: 15px;
+            height: 25px;
+            width: 500px;
+            margin-bottom: 10px;
+            border-width: 5px;
+            border-radius: 25px;
+            padding: 5px;
+        }
+
+        input:focus {
+            border-color: lightblue;
+            outline: none;
+            transition: 0.25s;
+        }
+        
+        button {
+            font-size: 15px;
+            height: 50px;
+            width: 100px;
+            border-style: none;
+            border-radius: 25px;
+            background-color: #938a80;
+        }
+
+        button:hover {
+            transition: 0.25s;
+            background-color: #6e675f;
+        }
+
+        button:active{
+            transition: 0.25s;
+            background-color: #524d47;
+        }
+        
+        #outputText {
+            visibility: hidden;
+            color: #182023;
+            color: white;
+            background-color: #182023;
+            border-style: solid;
+            border-radius: 25px;
+            border-color: #182023;
+            padding: 10px;
+        }
+
+        ::placeholder {
+            text-align: center;
+            font-size: 15px;
         }
     </style>
 </head>
@@ -18,11 +73,13 @@
     <div id="container">
         <input type="text" id="usernameInput" placeholder="username">
         <br>
-        <input type="text" id="passwordInput" placeholder="password">
+        <input type="password" id="passwordInput" placeholder="password">
         
         <br>
-        <button id="registerBtn">register</button>
-        <button id="loginBtn">login</button>
+        
+        <button id="registerBtn">Register</button>
+        <button id="loginBtn">Log in</button>
+        <br>
         <br>
         <span id="outputText"></span>
     </div>

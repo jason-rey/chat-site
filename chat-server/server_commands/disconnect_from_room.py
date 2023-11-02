@@ -1,3 +1,6 @@
+from asyncio import sleep, create_task
+import time
+
 from .command_interface import CommandInterface
 from room_logic import User
 from room_logic import Room
@@ -7,6 +10,21 @@ class DisconnectFromRoom(CommandInterface):
         self.users = users
         self.rooms = rooms
     
+    async def delayRoomDestruction(self, roomName:str, timeoutTime:int):
+        if roomName not in self.rooms:
+            return
+        checkDelay = 0.25
+        start = time.time()
+        curr = start
+       
+        while (curr - start) < timeoutTime:
+            if self.rooms[roomName].numberOfConnections > 0:
+                return  
+            await sleep(checkDelay)
+            curr = time.time()
+
+        self.rooms.pop(roomName)
+
     async def execute(self, roomName:str="", username:str=""):
         if roomName == "" or username == "":
             return await self.create_response(
@@ -36,7 +54,7 @@ class DisconnectFromRoom(CommandInterface):
         userObj.currentRoom = None
         
         if roomObj.numberOfConnections <= 0:
-            self.rooms.pop(roomName)
+            create_task(self.delayRoomDestruction(roomName, 60))
 
         return await self.create_response(self.responseStatusEnum.OK)
 

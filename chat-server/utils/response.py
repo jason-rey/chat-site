@@ -12,6 +12,14 @@ class Response:
         self.data = data
 
     def to_json(self) -> str:
+        """
+            Response format:
+            {
+                "statusCode": a StatusType,
+                "type": the type of response,
+                "data": json containing data
+            }
+        """
         out = {
             "statusCode": self.status.value,
             "type": self.type,

@@ -16,10 +16,17 @@ const msg = {
     "action": "get_rooms",
     "args": {}
 };
-sendMessage(JSON.stringify(msg));
+sendCommandToServer(JSON.stringify(msg));
 
 document.getElementById("createRoom").addEventListener("click", async function(event) {
-    let roomName = document.getElementById("roomNameBox").value;
+    const nameBox = document.getElementById("roomNameBox");
+    const roomName = nameBox.value
+    nameBox.value = "";
+    if (document.getElementById(roomName) != null) {
+        alert("room with that name already exists");
+        return;
+    }
+
     let createRoomCommand = {
         "token": token,
         "action": "create_room",
@@ -28,7 +35,8 @@ document.getElementById("createRoom").addEventListener("click", async function(e
             "username": username
         }
     };
-    await sendMessage(JSON.stringify(createRoomCommand));
+
+    await sendCommandToServer(JSON.stringify(createRoomCommand));
 
     document.getElementById("contentArea").innerHTML = "";
     let connectCommand = {
@@ -40,7 +48,7 @@ document.getElementById("createRoom").addEventListener("click", async function(e
         }
     };
     currentRoom = roomName;
-    await sendMessage(JSON.stringify(connectCommand));
+    await sendCommandToServer(JSON.stringify(connectCommand));
 });
 
 document.getElementById("refreshRooms").addEventListener("click", async function(event) {
@@ -49,7 +57,7 @@ document.getElementById("refreshRooms").addEventListener("click", async function
         "action": "get_rooms",
         "args": {}
     };
-    await sendMessage(JSON.stringify(command));
+    await sendCommandToServer(JSON.stringify(command));
 });
 
 document.getElementById("disconnectButton").addEventListener("click", async function(event) {
@@ -61,13 +69,13 @@ document.getElementById("disconnectButton").addEventListener("click", async func
             "username": username
         }
     };
-    await sendMessage(JSON.stringify(dcMsg));
+    await sendCommandToServer(JSON.stringify(dcMsg));
 
     document.getElementById("msgInput").style.visibility = "hidden";
     event.target.style.display = "none";
     document.getElementById("roomControls").style = "";
 
-    await sendMessage(JSON.stringify(msg));
+    await sendCommandToServer(JSON.stringify(msg));
 });
 
 let responseActions = {
@@ -76,14 +84,68 @@ let responseActions = {
     "receive_message" : receive_message
 };
 
+function get_rooms(roomInfo) {
+    if (roomInfo.rooms === "") {
+        return;
+    }
+
+    console.log(roomInfo);
+    let box = document.getElementById("contentArea");
+    box.innerHTML = "";
+    for (var name in roomInfo.rooms) {
+        let capacity = roomInfo.rooms[name].connectedCount;
+        let roomDiv = document.createElement("div");
+        roomDiv.id = name;
+        roomDiv.className = "roomBox";
+
+        nameDiv = document.createElement("span");
+        nameDiv.innerText += name;
+        nameDiv.style.float = "left";
+
+        capacityDiv = document.createElement("span");
+        capacityDiv.innerText = capacity;
+        capacityDiv.style.float = "right";
+
+        roomDiv.appendChild(nameDiv);
+        roomDiv.appendChild(capacityDiv);
+
+        roomDiv.addEventListener("click", async function(event) {
+            command = {
+                "token": token,
+                "action": "connect_to_room",
+                "args": {
+                    "username": username,
+                    "roomName": roomDiv.id
+                }
+            };
+
+            box.innerHTML = "";
+            await sendCommandToServer(JSON.stringify(command));
+        });
+
+        box.append(roomDiv);
+    }
+}
+
+async function connect_to_room(roomInfo) {
+    currentRoom = roomInfo["roomName"];
+    document.getElementById("roomControls").style.display = "none";
+    document.getElementById("msgInput").style.visibility = "visible";
+    document.getElementById("disconnectButton").style.display = "";
+}
+
+async function receive_message(messageData) {
+    document.getElementById("contentArea").innerText += `${messageData.author}: ${messageData.message}\n`;
+}
+
 socket.addEventListener("message", function(event) {
     let responseInfo = JSON.parse(event.data);
     console.log(responseInfo);
 
-    if (responseInfo.type != "error") {
+    if (responseInfo.statusCode == "ok" && responseInfo.type != "") {
         let method = responseActions[responseInfo.type];
         method(responseInfo.data);
-    } else {
+    } else if (responseInfo.statusCode == "error") {
         alert(responseInfo.data.message);
     }
 });
@@ -106,7 +168,7 @@ function waitForConnection(socket) {
     });
 }
 
-async function sendMessage(message) {
+async function sendCommandToServer(message) {
     try {
         if (socket.readyState !== socket.OPEN) {
             await waitForConnection(socket);
@@ -117,60 +179,6 @@ async function sendMessage(message) {
     } catch (err) {
         console.log(err);
     }
-}
-
-function get_rooms(roomInfo) {
-    if (roomInfo.rooms === "") {
-        return;
-    }
-
-    console.log(roomInfo);
-    let box = document.getElementById("contentArea");
-    box.innerHTML = "";
-    for (var name in roomInfo.rooms) {
-        let capacity = roomInfo.rooms[name].connectedCount;
-        let roomDiv = document.createElement("div");
-        roomDiv.id = name;
-        roomDiv.className = "roomBox";
-
-        nameDiv = document.createElement("div");
-        nameDiv.innerText += name;
-        nameDiv.style.float = "left";
-
-        capacityDiv = document.createElement("div");
-        capacityDiv.innerText = capacity;
-        capacityDiv.style.float = "right";
-
-        roomDiv.appendChild(nameDiv);
-        roomDiv.appendChild(capacityDiv);
-
-        roomDiv.addEventListener("click", async function(event) {
-            document.getElementById("contentArea").innerHTML = "";
-            command = {
-                "token": token,
-                "action": "connect_to_room",
-                "args": {
-                    "username": username,
-                    "roomName": roomDiv.id
-                }
-            };
-
-            await sendMessage(JSON.stringify(command));
-            currentRoom = event.target.id;
-        });
-
-        box.append(roomDiv);
-    }
-}
-
-async function connect_to_room(connectedUsers) {
-    document.getElementById("roomControls").style.display = "none";
-    document.getElementById("msgInput").style.visibility = "visible";
-    document.getElementById("disconnectButton").style.display = "";
-}
-
-async function receive_message(messageData) {
-    document.getElementById("contentArea").innerText += `${messageData.author}: ${messageData.message}\n`;
 }
 
 let input = document.getElementById("msgInput");
@@ -193,6 +201,6 @@ async function sendChatMessage() {
             "message": box.value
         }
     };
-    await sendMessage(JSON.stringify(messageCommand));
+    await sendCommandToServer(JSON.stringify(messageCommand));
     box.value = "";
 }

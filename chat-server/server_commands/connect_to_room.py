@@ -9,25 +9,6 @@ class ConnectToRoom(CommandInterface):
         self.rooms = rooms
     
     async def execute(self, username:str="", roomName:str=""):
-        '''
-            command format: 
-            {
-                "action": "connect_to_room",
-                "args": {
-                    "username": username,
-                    "roomName": roomName
-                }
-            }
-
-            response:
-            {
-                "statusCode": "200",
-                "type": "connect_to_room",
-                "data": {
-                    "connectedUsers: "["user1", "user2", ...]"
-                }
-            }
-        '''
         if username == "" or roomName == "":
             return await self.create_response(
                 self.responseStatusEnum.ERROR, 
@@ -50,5 +31,5 @@ class ConnectToRoom(CommandInterface):
         return await self.create_response(
             self.responseStatusEnum.OK, 
             type=self.actionName,
-            data={"usernames": connectedUsernames}
+            data={"roomName": roomName, "usernames": connectedUsernames}
         )

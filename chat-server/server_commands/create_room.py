@@ -13,6 +13,13 @@ class CreateRoom(CommandInterface):
                 data={"message": "invalid arguments to CreateRoom"}
             )
         
+        if roomName in self.rooms:
+            return await self.create_response(
+                status=self.responseStatusEnum.ERROR,
+                type="room_exists",
+                data={"message": f"room with name ({roomName}) already exists"}
+            )
+
         self.rooms[roomName] = Room(roomName)
 
         return await self.create_response(status=self.responseStatusEnum.OK)

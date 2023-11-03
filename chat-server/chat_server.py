@@ -67,10 +67,7 @@ class Server():
                     raise Exception("token is invalid")
 
                 result = await self.execute_command(command)    
-                print(result.to_json())
                 await user.socket.send(result.to_json())
-                if result.status == utils.Response.StatusType.ERROR:
-                    raise Exception(f"{result.type}")
             except Exception as e:
                 print(e)
                 print(f"[DISCONNECTION] {user.name} ({user.addr}:{user.port}) has disconnected")
@@ -83,9 +80,9 @@ class Server():
         """"
             command format:
             {
-                "token": "token",
-                "action": "action",
-                "args": {}
+                "token": the user's authentication token,
+                "action": the command name,
+                "args": command arguments in json
             }
         """
 

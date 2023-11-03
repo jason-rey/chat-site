@@ -12,14 +12,16 @@
 <body>
     <div id="container">
         <div id="roomControls">
-            <button id="createRoom">Create Room</button>
-            <input id="roomNameBox" type="text" placeholder="Room Name">
-            <button id="refreshRooms">Refresh Rooms</button>
+            <button class="roomControlButton" id="createRoom">Create Room</button>
+            <input class="roomControlButton" id="roomNameBox" type="text" placeholder="Room Name">
+            <button class="roomControlButton" id="refreshRooms">Refresh Rooms ⟳</button>
         </div>
-        <button id="disconnectButton" style="display: none;">Disconnect</button>
-        <div id="textBox">
-        </div>
-        <input type="text" id="msgInput">
+        <button class="roomControlButton" id="disconnectButton" style="display: none;">Disconnect</button>
+        <div id="contentArea"></div>
+        
+        <input id="msgInput" type="text" placeholder="Send a message">
+
+
     </div>
 </body>
 </html>

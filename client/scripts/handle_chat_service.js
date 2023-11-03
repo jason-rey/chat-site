@@ -30,7 +30,7 @@ document.getElementById("createRoom").addEventListener("click", async function(e
     };
     await sendMessage(JSON.stringify(createRoomCommand));
 
-    document.getElementById("textBox").innerHTML = "";
+    document.getElementById("contentArea").innerHTML = "";
     let connectCommand = {
         "token": token,
         "action": "connect_to_room",
@@ -63,6 +63,7 @@ document.getElementById("disconnectButton").addEventListener("click", async func
     };
     await sendMessage(JSON.stringify(dcMsg));
 
+    document.getElementById("msgInput").style.visibility = "hidden";
     event.target.style.display = "none";
     document.getElementById("roomControls").style = "";
 
@@ -79,9 +80,11 @@ socket.addEventListener("message", function(event) {
     let responseInfo = JSON.parse(event.data);
     console.log(responseInfo);
 
-    if (responseInfo.type != "") {
+    if (responseInfo.type != "error") {
         let method = responseActions[responseInfo.type];
         method(responseInfo.data);
+    } else {
+        alert(responseInfo.data.message);
     }
 });
 
@@ -122,20 +125,27 @@ function get_rooms(roomInfo) {
     }
 
     console.log(roomInfo);
-    let box = document.getElementById("textBox");
+    let box = document.getElementById("contentArea");
     box.innerHTML = "";
     for (var name in roomInfo.rooms) {
         let capacity = roomInfo.rooms[name].connectedCount;
         let roomDiv = document.createElement("div");
         roomDiv.id = name;
-        roomDiv.className = "roomBox"
-        roomDiv.innerHTML += `
-            <div style="float:left; margin-left:5px;">${name}</div>
-            <div style="float:right; margin-right:5px;">${capacity}</dov>
-        `
+        roomDiv.className = "roomBox";
+
+        nameDiv = document.createElement("div");
+        nameDiv.innerText += name;
+        nameDiv.style.float = "left";
+
+        capacityDiv = document.createElement("div");
+        capacityDiv.innerText = capacity;
+        capacityDiv.style.float = "right";
+
+        roomDiv.appendChild(nameDiv);
+        roomDiv.appendChild(capacityDiv);
 
         roomDiv.addEventListener("click", async function(event) {
-            document.getElementById("textBox").innerHTML = "";
+            document.getElementById("contentArea").innerHTML = "";
             command = {
                 "token": token,
                 "action": "connect_to_room",
@@ -154,16 +164,13 @@ function get_rooms(roomInfo) {
 }
 
 async function connect_to_room(connectedUsers) {
-    // document.getElementById("textBox").innerHTML = "";
     document.getElementById("roomControls").style.display = "none";
-    document.getElementById("disconnectButton").style = "";
+    document.getElementById("msgInput").style.visibility = "visible";
+    document.getElementById("disconnectButton").style.display = "";
 }
 
 async function receive_message(messageData) {
-        // await waitForConnection();
-    document.getElementById("textBox").innerText += `${messageData.author}: ${messageData.message}\n`;
-        // document.getElementById("textBox").innerHTML += `${messageData[0]}: ${messageData[1]}\n`
-
+    document.getElementById("contentArea").innerText += `${messageData.author}: ${messageData.message}\n`;
 }
 
 let input = document.getElementById("msgInput");

@@ -22,4 +22,4 @@ class CreateRoom(CommandInterface):
 
         self.rooms[roomName] = Room(roomName)
 
-        return await self.create_response(status=self.responseStatusEnum.OK)
+        # return await self.create_response(status=self.responseStatusEnum.OK)

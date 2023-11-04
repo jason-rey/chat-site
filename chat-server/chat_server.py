@@ -66,8 +66,9 @@ class Server():
                 if not isValid:
                     raise Exception("token is invalid")
 
-                result = await self.execute_command(command)    
-                await user.socket.send(result.to_json())
+                result = await self.execute_command(command)
+                if result != None:    
+                    await user.socket.send(result.to_json())
             except Exception as e:
                 print(e)
                 print(f"[DISCONNECTION] {user.name} ({user.addr}:{user.port}) has disconnected")

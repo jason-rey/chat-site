@@ -56,5 +56,5 @@ class DisconnectFromRoom(CommandInterface):
         if roomObj.numberOfConnections <= 0:
             create_task(self.delayRoomDestruction(roomName, 60))
 
-        return await self.create_response(self.responseStatusEnum.OK)
+        # return await self.create_response(self.responseStatusEnum.OK)
 

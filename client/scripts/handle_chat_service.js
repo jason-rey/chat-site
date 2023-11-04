@@ -1,7 +1,7 @@
-const socket = new WebSocket("ws://127.0.0.1:5050")
+const socket = new WebSocket("ws://35.233.141.157:5473")
 let username = localStorage.getItem("username");
 let token = localStorage.getItem("token");
-
+console.log(token);
 let connectionInfo = {
     "username": username,
     "token": token

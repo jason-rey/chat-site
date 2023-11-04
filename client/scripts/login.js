@@ -1,4 +1,4 @@
-const URL = "http://34.127.30.181:5050/"
+const URL = "http://35.233.141.157:5050/"
 
 document.getElementById("registerBtn").addEventListener("click", async () => {
     const username = document.getElementById("usernameInput").value;

@@ -100,11 +100,6 @@ body {
     width: 250px;
 }
 
-#msgInput {
-    margin-left: auto;
-    margin-right: 0;
-}
-
 .roomBox {
     border: 1px;
     border-style: solid;
@@ -136,11 +131,12 @@ body {
 #msgInput {
     visibility: hidden;
     width: 75%;
-    height: 15px;
+    height: 4vh;
     background-color: lightgray;
     border-style: none;
     border-radius: 25px;
     padding: 10px;
     margin-left: auto;
     margin-right: auto;
+    font-size: 16px;
 }

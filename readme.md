@@ -1,8 +1,10 @@
 # Chat-Room Server
 A chat room server built using Python and websockets
 <br>
-**Currently hosted on https://chat-site-puce.vercel.app/**
-
+Uses [flask-authentication-server](https://github.com/jason-rey/flask-authentication-server) to handle user authentication
+<br>
+**Currently hosted on https://jason-rey.github.io/chat-site/**
+<br>
 ## Table of Contents
 - [Installation](#installation)
 - [Usage](#usage)

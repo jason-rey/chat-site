@@ -1,4 +1,4 @@
-const socket = new WebSocket("ws://35.233.141.157:5473")
+const socket = new WebSocket("wss://chat-site-production-ed03.up.railway.app/")
 let username = localStorage.getItem("username");
 let token = localStorage.getItem("token");
 console.log(token);

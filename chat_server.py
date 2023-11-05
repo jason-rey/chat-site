@@ -13,7 +13,7 @@ class Server():
         self.ip = _ip
         self.port = _port
 
-        self.authenticator = utils.Authenticator(Config.AUTH_SERVER_IP, Config.AUTH_SERVER_PORT)
+        self.authenticator = utils.Authenticator(Config.AUTH_SERVER_IP)
         if not issubclass(type(self.authenticator), utils.AuthenticatorInterface):
             raise Exception("Authenticator does not implement expected interface")
 

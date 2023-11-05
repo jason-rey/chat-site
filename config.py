@@ -8,4 +8,3 @@ class Config():
     HOST_PORT = os.getenv("host_port")
 
     AUTH_SERVER_IP = os.getenv("auth_server_ip")
-    AUTH_SERVER_PORT = os.getenv("auth_server_port")

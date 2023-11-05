@@ -17,7 +17,7 @@ class Authenticator(AuthenticatorInterface):
             "token": givenToken
         }
 
-        url = f"http://{self.ip}:{self.port}/authenticate-token"
+        url = f"http://{self.ip}/authenticate-token"
         response = requests.post(
             url=url,
             headers=headers,

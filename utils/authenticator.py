@@ -4,9 +4,8 @@ from .authenticator_interface import AuthenticatorInterface
 from room_logic import User
 
 class Authenticator(AuthenticatorInterface):
-    def __init__(self, _ip: str, _port: str):
+    def __init__(self, _ip: str):
         self.ip = _ip
-        self.port = _port
 
     async def check(self, user: User, givenToken: str) -> bool:
         headers = {

@@ -8,7 +8,8 @@ Uses [flask-authentication-server](https://github.com/jason-rey/flask-authentica
 ## Table of Contents
 - [Installation](#installation)
 - [Usage](#usage)
-- [Commands](#commands)
+- [Client Commands](#client-commands)
+- [Server Messages](#server-messages)
 
 ## Installation
 1. Create .env file with the required variables shown in config.py
@@ -35,7 +36,7 @@ const connectionInfo = {
 socket.onopen = () => socket.send(JSON.stringify(connectionInfo));
 ```
 
-## Commands
+## Client Commands
 The server accepts commands in the following json format:
 ```javascript
 {
@@ -113,7 +114,92 @@ socket.send(JSON.stringify(command));
     "data": {
             "roomName": "room one",
             "usernames": "[user1, otherUser, ...]" // an array containing the users currently connected to the room
-        }
+    }
+}
+```
+
+### Disconnect From Room
+**Description:**
+Disconnects a user to the given room
+
+**Args**
+- `username` (string, required): The user's name.
+- `roomName` (string, required): The target room.
+
+**Example:**
+```javascript
+const command = {
+    "token": "user's token",
+    "action": "disconnect_from_room",
+    "args": {
+        "username": "testUser",
+        "roomName": "room one"
+    }
+};
+
+socket.send(JSON.stringify(command));
+```
+
+### Create Room
+**Description:**
+Creates a new room
+
+**Args**
+- `username` (string, required): The user's name.
+- `roomName` (string, required): The new room's name.
+
+**Example:**
+```javascript
+const command = {
+    "token": "user's token",
+    "action": "create_room",
+    "args": {
+        "username": "testUser",
+        "roomName": "room one"
+    }
+};
+
+socket.send(JSON.stringify(command));
+```
+
+### Send Message
+**Description:**
+Sends a message to the given room
+
+**Args**
+- `roomName` (string, required): The target room
+- `author` (string, required): The user's name.
+- `message` (string, required): The message to be sent.
+
+**Example:**
+```javascript
+const command = {
+    "token": "user's token",
+    "action": "send_message",
+    "args": {
+        "roomName": "room one",
+        "author": "testUser",
+        "message": "example message"
+    }
+};
+
+socket.send(JSON.stringify(command));
+```
+
+## Server Messages
+
+### Receive Message
+**Description:**
+A message sent from another connected user to the current user's room
+
+**Example:**
+```javascript
+{
+    "statusCode": "ok",
+    "type": "receive_message",
+    "data": {
+        "author": "testUser",
+        "message": "this is an example message"
     }
 }
 ```

@@ -1,11 +1,13 @@
 # Chat Room
 A chat room website built using Python and websockets
 <br>
-Uses [flask-authentication-server](https://github.com/jason-rey/flask-authentication-server) to handle user authentication
-<br>
 <br>
 **Currently hosted on https://jason-rey.github.io/chat-site/**
 <br>
+
+## Dependencies
+- [flask-authentication-server](https://github.com/jason-rey/flask-authentication-server) for handling user authentication
+
 ## Table of Contents
 - [Installation](#installation)
 - [Usage](#usage)

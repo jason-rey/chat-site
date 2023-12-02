@@ -8,9 +8,9 @@ body {
 }
 
 input {
-    font-size: 16px;
-    height: 5vh;
-    width: 75vw;
+    font-size: 15px;
+    height: 25px;
+    width: 500px;
     margin-bottom: 10px;
     border-width: 5px;
     border-radius: 25px;
@@ -24,9 +24,9 @@ input:focus {
 }
 
 button {
-    font-size: 16px;
-    height: 7vh;
-    width: 25vw;
+    font-size: 15px;
+    height: 50px;
+    width: 100px;
     border-style: none;
     border-radius: 25px;
     background-color: #938a80;

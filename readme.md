@@ -1,6 +1,9 @@
 # Chat Room
 A chat room website built using Python and websockets
 <br>
+<br>
+**Currently hosted on https://jason-rey.github.io/chat-site/**
+<br>
 
 
 ## Dependencies
